@@ -19,7 +19,7 @@ async def main():
         cb = await b.new_context(viewport={'width': 390, 'height': 844}); B = await cb.new_page(); B.on('pageerror', lambda e: errs.append('B ' + str(e)))
         # wrong invite code is refused
         await join(A, '07700 900111', 'Asif', code='NOPE'); print('bad code ->', await A.inner_text('#authErr'))
-        await A.fill('#a_code', 'test-code'); await A.click('#authGo'); await A.wait_for_timeout(900)
+        await A.screenshot(path='tests/a_auth.png'); await A.fill('#a_code', 'test-code'); await A.click('#authGo'); await A.wait_for_timeout(1500); await A.screenshot(path='tests/a_join.png'); await A.wait_for_timeout(1300)
         print('A signed in as:', (await A.inner_text('.who')).split('Change')[0].strip())
         await add_goal(A, 'd', 'Hit my protein', 'Athletic', {'e_ml': 'Protein', 'e_mt': '150', 'e_mu': 'g'})
         await add_goal(A, 'd', 'Study 2 hours', 'Academic')
@@ -29,8 +29,7 @@ async def main():
         await A.fill('input[id^=v_]', '160'); await A.click('[data-act=tick] >> nth=0'); await A.wait_for_timeout(200)
         await A.click('[data-act=tick]'); await A.wait_for_timeout(200)
         await A.click('[data-act=close]'); await A.wait_for_timeout(300); print('A close ->', await toast(A))
-        await A.set_input_files('input[data-day]', {'name': 'p.jpg', 'mimeType': 'image/jpeg', 'buffer': JPG}); await A.wait_for_timeout(1200); print('A upload ->', await toast(A))
-        await A.screenshot(path='tests/a_today.png')
+        await A.set_input_files('input[data-day]', {'name': 'p.jpg', 'mimeType': 'image/jpeg', 'buffer': JPG}); await A.wait_for_timeout(1000); print('A upload ->', (await A.inner_text('.pop-text')) if await A.locator('.pop-text').count() else 'NO CELEBRATION'); await A.screenshot(path='tests/a_pop.png'); await A.wait_for_timeout(1600);         await A.screenshot(path='tests/a_today.png')
         # B joins on another phone; duplicate phone and name are refused
         await join(B, '07700 900111', 'Maya'); print('dup phone ->', await B.inner_text('#authErr'))
         await B.fill('#a_phone', '+44 7700 900222'); await B.fill('#a_name', 'asif'); await B.click('#authGo'); await B.wait_for_timeout(700); print('dup name ->', await B.inner_text('#authErr'))
