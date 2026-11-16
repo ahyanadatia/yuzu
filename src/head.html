@@ -26,7 +26,7 @@ html,body{height:100%}
 body{margin:0;background:var(--ink);color:var(--chalk);font:400 16px/1.45 var(--body);-webkit-text-size-adjust:100%}
 button,input,select{font:inherit;color:inherit}
 h1,h2,h3,p{margin:0}
-.app{max-width:520px;margin:0 auto;padding:0 16px 96px;display:flex;flex-direction:column;gap:16px}
+.app{max-width:520px;margin:0 auto;padding:0 16px 110px;display:flex;flex-direction:column;gap:16px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 4px}
 .brand{display:flex;align-items:center;gap:8px}
 .brand svg{width:30px;height:28px}
@@ -81,7 +81,7 @@ legend{font:700 16px/1 var(--display);letter-spacing:.1em;text-transform:upperca
 label{font-size:13px;color:var(--mute);display:flex;flex-direction:column;gap:4px;min-width:0}
 .row>label{flex:1 1 120px}
 form.row{flex-direction:row;align-items:flex-end}
-input[type=text],input[type=number],select{width:100%;min-height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--ink);padding:0 12px;font-size:16px;color:var(--chalk)}
+input[type=text],input[type=number],input[type=tel],input[type=password],select{width:100%;min-height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--ink);padding:0 12px;font-size:16px;color:var(--chalk)}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{appearance:none;border:1px solid var(--line);background:none;border-radius:99px;padding:7px 11px;font-size:13px;cursor:pointer;color:var(--chalk)}
 .err{color:var(--red);font-size:14px;min-height:0}
@@ -154,14 +154,76 @@ label.check input{width:22px;height:22px;accent-color:var(--yellow);flex:none}
 .show li{margin:2px 0}
 .show ul{margin:0;padding-left:18px}
 
-/* tab bar */
-.tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(16,17,18,.96);border-top:1px solid var(--line);display:flex;justify-content:center}
-.tabs div{display:flex;width:100%;max-width:520px}
-.tabs button{flex:1;appearance:none;background:none;border:0;min-height:60px;font:700 15px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);cursor:pointer;position:relative}
-.tabs button[aria-current=page]{color:var(--chalk)}
-.tabs button[aria-current=page]::after{content:"";position:absolute;left:30%;right:30%;top:0;height:3px;background:var(--yellow)}
-.badge{display:inline-block;min-width:20px;padding:3px 6px;border-radius:99px;background:var(--yellow);color:var(--ink);font-size:13px;margin-left:6px;letter-spacing:0}
-.toast{position:fixed;left:16px;right:16px;bottom:76px;max-width:488px;margin:0 auto;background:var(--chalk);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:500;display:none}
+/* side rail */
+.rail{position:fixed;left:0;top:0;bottom:0;width:64px;background:#17181A;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:14px;z-index:5}
+.rail .mk{width:34px;height:31px;margin-bottom:4px}
+.rail .mk polygon{transform-box:fill-box;transform-origin:center}
+.rail nav{position:relative;display:flex;flex-direction:column;width:100%}
+.rail .ind{position:absolute;left:0;top:10px;width:4px;height:44px;background:var(--yellow);border-radius:0 4px 4px 0;transform:translateY(calc(var(--i,0) * 64px));box-shadow:0 0 14px rgba(245,228,71,.55)}
+.rail button{appearance:none;background:none;border:0;height:64px;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--mute);cursor:pointer;position:relative;font:700 11px/1 var(--display);letter-spacing:.1em;text-transform:uppercase}
+.rail button svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:square;stroke-linejoin:miter}
+.rail button[aria-current=page]{color:var(--chalk)}
+.rail button[aria-current=page] svg{color:var(--yellow)}
+.rail .badge{position:absolute;top:8px;right:9px;margin:0;min-width:18px;padding:2px 5px;font-size:11px}
+.rail .badge:empty{display:none}
+body.noside .rail{display:none}
+body:not(.noside) .brand svg{display:none}
+body:not(.noside) .app{margin-left:64px;max-width:none}
+body:not(.noside) .app>*{width:100%;max-width:520px;margin-left:auto;margin-right:auto}
+.badge{display:inline-block;min-width:20px;padding:3px 6px;border-radius:99px;background:var(--yellow);color:var(--ink);font-size:13px;margin-left:6px;letter-spacing:0;text-align:center}
+
+/* the yuzu */
+.yz{display:block;overflow:visible}
+.hero{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 2px}
+.hero .yz{width:104px;height:104px}
+.hero .sh{width:70px;height:10px;border-radius:50%;background:#000;opacity:.45}
+
+/* locked-in moment */
+.pop{position:fixed;inset:0;z-index:20;background:rgba(16,17,18,.92);display:flex;align-items:center;justify-content:center;pointer-events:none}
+.pop-in{position:relative;width:220px;height:260px;display:flex;flex-direction:column;align-items:center}
+.pop .yz,.pop-mark{position:absolute;left:50%;top:20px;width:150px;height:150px;margin-left:-75px}
+.pop-mark{opacity:0}
+.pop .drop{position:absolute;left:50%;top:95px;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50% 50% 50% 0;background:var(--yellow);opacity:0}
+.pop-text{position:absolute;top:186px;left:-60px;right:-60px;text-align:center;font:italic 800 34px/1.05 var(--display);opacity:0;text-wrap:balance}
+
+@media (prefers-reduced-motion:no-preference){
+  .rail .ind{transition:transform .38s cubic-bezier(.3,1.4,.5,1)}
+  .rail button svg{transition:transform .2s,color .2s}
+  .rail button:active svg{transform:scale(.85)}
+  .rail button[aria-current=page] svg{animation:nudge .4s}
+  .rail .mk polygon{animation:seg 5s ease-in-out infinite}
+  .rail .mk polygon:nth-child(2){animation-delay:.25s}.rail .mk polygon:nth-child(3){animation-delay:.5s}
+  .view.enter>*{animation:rise .42s cubic-bezier(.2,.8,.3,1) both}
+  .view.enter>*:nth-child(2){animation-delay:.05s}.view.enter>*:nth-child(3){animation-delay:.1s}.view.enter>*:nth-child(4){animation-delay:.15s}.view.enter>*:nth-child(5){animation-delay:.2s}.view.enter>*:nth-child(n+6){animation-delay:.25s}
+  .view.enter .bar i{animation:grow .7s .2s cubic-bezier(.2,.8,.3,1) both;transform-origin:left}
+  .view.enter .big{animation:punch .5s .1s both}
+  .state.ok::before{animation:tick .3s both}
+  .hero .yz{animation:bob 2.6s ease-in-out infinite}
+  .hero .sh{animation:shadow 2.6s ease-in-out infinite}
+  .yz .leaf{transform-box:fill-box;transform-origin:0% 100%;animation:sway 2.6s ease-in-out infinite}
+  .yz .shine{animation:shine 2.6s ease-in-out infinite}
+  .pop{animation:popbg 2.1s both}
+  .pop .yz{animation:drop 2.1s cubic-bezier(.3,.7,.4,1) both}
+  .pop-mark{animation:burst 2.1s both}
+  .pop .drop{animation:spray 2.1s both}
+  .pop-text{animation:say 2.1s both}
+}
+@keyframes nudge{0%{transform:translateX(-6px)}60%{transform:translateX(3px)}100%{transform:none}}
+@keyframes seg{0%,86%,100%{transform:none}92%{transform:scale(1.14)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:none}}
+@keyframes punch{0%{transform:scale(.9)}60%{transform:scale(1.06)}100%{transform:none}}
+@keyframes tick{from{opacity:0;transform:rotate(45deg) translate(-2px,-2px) scale(.3)}to{opacity:1;transform:rotate(45deg) translate(-2px,-2px)}}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
+@keyframes shadow{0%,100%{transform:scaleX(1);opacity:.45}50%{transform:scaleX(.78);opacity:.28}}
+@keyframes sway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(10deg)}}
+@keyframes shine{0%,100%{opacity:.75}50%{opacity:.35}}
+@keyframes popbg{0%{opacity:0}8%,86%{opacity:1}100%{opacity:0}}
+@keyframes drop{0%{transform:translateY(-70vh) rotate(-40deg)}22%{transform:translateY(0) rotate(0) scale(1.18,.8)}30%{transform:translateY(-34px) scale(.94,1.08)}38%{transform:translateY(0) scale(1.1,.9)}44%{transform:scale(1)}52%{transform:scale(.9) rotate(-8deg)}58%{transform:scale(1.35);opacity:1}62%,100%{transform:scale(1.7);opacity:0}}
+@keyframes burst{0%,57%{opacity:0;transform:scale(.2) rotate(-25deg)}66%{opacity:1;transform:scale(1.16) rotate(4deg)}74%,100%{opacity:1;transform:none}}
+@keyframes spray{0%,57%{opacity:0;transform:rotate(var(--a)) translateY(0) scale(.4)}60%{opacity:1}80%{opacity:1;transform:rotate(var(--a)) translateY(-112px) scale(1)}90%,100%{opacity:0;transform:rotate(var(--a)) translateY(-128px) scale(.5)}}
+@keyframes say{0%,64%{opacity:0;transform:translateY(14px)}76%,100%{opacity:1;transform:none}}
+.toast{position:fixed;left:80px;right:16px;top:14px;max-width:488px;margin:0 auto;z-index:15;box-shadow:0 8px 30px rgba(0,0,0,.5);background:var(--chalk);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:500;display:none}
 .toast.on{display:block}
 .zoom{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:16px;cursor:zoom-out;border:0}
 .zoom.on{display:flex}
@@ -169,7 +231,7 @@ label.check input{width:22px;height:22px;accent-color:var(--yellow);flex:none}
 @media (prefers-reduced-motion:no-preference){.bar i{transition:width .4s}.seg i{transition:fill .3s}}
 </style>
 </head>
-<body>
+<body class="noside">
 <div class="app">
   <header class="top">
     <div class="brand" aria-label="Yuzu">
@@ -180,7 +242,16 @@ label.check input{width:22px;height:22px;accent-color:var(--yellow);flex:none}
   </header>
   <main class="view" id="view"><div class="card"><p class="eyebrow">Earn your rank.</p><p class="mute">Loading the league…</p></div></main>
 </div>
-<nav class="tabs" aria-label="Screens"><div id="tabs"></div></nav>
+<aside class="rail" aria-label="Yuzu">
+  <svg class="mk" viewBox="136 88 406 368" aria-hidden="true"><g fill="#F5E447"><polygon points="140,92 275,123 333,238 203,205"/><polygon points="538,92 407,123 345,238 473,205"/><polygon points="340,245 388,312 340,452 290,312"/></g></svg>
+  <nav id="rail" aria-label="Screens">
+    <i class="ind" id="ind"></i>
+    <button data-act="tab" data-v="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 12.5l3 3 5-6.5"/></svg>Today</button>
+    <button data-act="tab" data-v="feed"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v7H4z"/><path d="M4 15h16M4 20h10"/></svg>Feed<span class="badge" id="feedBadge"></span></button>
+    <button data-act="tab" data-v="board"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V11h6v10M9 21V4h6v17M15 21v-7h6v7"/></svg>League</button>
+    <button data-act="tab" data-v="rules"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>Rules</button>
+  </nav>
+</aside>
 <div class="toast" id="toast" role="status"></div>
 <button class="zoom" id="zoom" aria-label="Close photo"><img id="zoomImg" alt="Proof photo, full size"></button>
 <script>

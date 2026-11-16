@@ -1,4 +1,12 @@
 /* ---------- shared bits ---------- */
+const YUZU = `<svg class="yz" viewBox="0 0 120 120" aria-hidden="true"><path class="leaf" d="M63 24C68 6 90 0 106 8 100 26 82 34 63 24Z" fill="#8DC63F"/><path d="M63 24C76 20 90 15 104 9" stroke="#5E9A22" stroke-width="2" fill="none"/><path d="M56 30l3-10 6 1-2 10z" fill="#6B5B2A"/><path d="M60 28c8-5 15-2 20 2 14 2 26 16 26 34 0 26-20 46-46 46S14 90 14 64c0-18 12-32 26-34 5-4 12-7 20-2z" fill="#F5E447"/><path d="M96 46c6 10 8 22 5 33-5 17-20 29-38 31 22 2 43-14 43-42 0-8-4-16-10-22z" fill="#DCC72E"/><g fill="#CDB820"><circle cx="38" cy="58" r="2"/><circle cx="52" cy="78" r="2"/><circle cx="72" cy="60" r="2"/><circle cx="84" cy="80" r="2"/><circle cx="62" cy="96" r="2"/><circle cx="34" cy="82" r="2"/><circle cx="58" cy="46" r="1.6"/><circle cx="90" cy="60" r="1.6"/></g><ellipse class="shine" cx="40" cy="48" rx="11" ry="6" transform="rotate(-35 40 48)" fill="#FFF8B0" opacity=".75"/></svg>`;
+function celebrate(text) {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return toast(text);
+  const el = document.createElement('div'); el.className = 'pop'; el.setAttribute('role', 'status');
+  el.innerHTML = `<div class="pop-in">${YUZU}<svg class="pop-mark" viewBox="136 88 406 368" aria-hidden="true"><g fill="#F5E447"><polygon points="140,92 275,123 333,238 203,205"/><polygon points="538,92 407,123 345,238 473,205"/><polygon points="340,245 388,312 340,452 290,312"/></g></svg>${[0, 45, 90, 135, 180, 225, 270, 315].map(a => `<i class="drop" style="--a:${a}deg"></i>`).join('')}<p class="pop-text"></p></div>`;
+  el.querySelector('.pop-text').textContent = text;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 2150);
+}
 function mark(l, r, b) {
   const seg = (pts, f) => `<polygon points="${pts}" fill="${f > 0 ? '#F5E447' : '#3B3E44'}" opacity="${f > 0 ? (.35 + .65 * Math.min(1, f)).toFixed(2) : 1}"/>`;
   return `<svg viewBox="136 88 406 368" role="img" aria-label="Daily, weekly and season progress" class="seg3">${seg('140,92 275,123 333,238 203,205', l)}${seg('538,92 407,123 345,238 473,205', r)}${seg('340,245 388,312 340,452 290,312', b)}</svg>`;
@@ -76,7 +84,7 @@ function joinCard() { return `<section class="card"><p class="mute">Loading your
 const normPhone = v => { let d = String(v || '').replace(/[^0-9+]/g, ''); if (d.startsWith('00')) d = '+' + d.slice(2); else if (d.startsWith('0')) d = '+44' + d.slice(1); else if (!d.startsWith('+')) d = '+' + d; return /^\+[0-9]{8,15}$/.test(d) ? d : null; };
 function authView() {
   const join = S.auth === 'join';
-  return `<form class="card" data-form="auth"><p class="eyebrow">Earn your rank.</p><h2>${join ? 'Join the league' : 'Welcome back'}</h2><div class="seg"><button type="button" data-act="auth" data-v="join" aria-pressed="${join}">New here</button><button type="button" data-act="auth" data-v="login" aria-pressed="${!join}">Sign in</button></div><label>Phone number<input type="tel" id="a_phone" autocomplete="tel" inputmode="tel" placeholder="07700 900123"></label>${join ? nameField('a_name', '') : ''}<label>${join ? 'Choose a 6-digit PIN' : 'Your PIN'}<input type="password" id="a_pin" inputmode="numeric" maxlength="6" autocomplete="${join ? 'new-password' : 'current-password'}"></label>${join ? `<label>Flat invite code<input type="text" id="a_code" autocapitalize="characters" autocomplete="off" placeholder="Ask a flatmate for it"></label>` : ''}<p class="small mute">${join ? 'Your number is how you sign in. No text is sent, so pick a PIN you will remember.' : 'Forgot your PIN? Ask whoever set Yuzu up to reset it.'}</p><p class="err" id="authErr" role="alert"></p><button class="btn" id="authGo">${join ? 'Join' : 'Sign in'}</button></form>`;
+  return `<div class="hero">${YUZU}<i class="sh"></i></div><form class="card" data-form="auth"><p class="eyebrow">Earn your rank.</p><h2>${join ? 'Join the league' : 'Welcome back'}</h2><div class="seg"><button type="button" data-act="auth" data-v="join" aria-pressed="${join}">New here</button><button type="button" data-act="auth" data-v="login" aria-pressed="${!join}">Sign in</button></div><label>Phone number<input type="tel" id="a_phone" autocomplete="tel" inputmode="tel" placeholder="07700 900123"></label>${join ? nameField('a_name', '') : ''}<label>${join ? 'Choose a 6-digit PIN' : 'Your PIN'}<input type="password" id="a_pin" inputmode="numeric" maxlength="6" autocomplete="${join ? 'new-password' : 'current-password'}"></label>${join ? `<label>Flat invite code<input type="text" id="a_code" autocapitalize="characters" autocomplete="off" placeholder="Ask a flatmate for it"></label>` : ''}<p class="small mute">${join ? 'Your number is how you sign in. No text is sent, so pick a PIN you will remember.' : 'Forgot your PIN? Ask whoever set Yuzu up to reset it.'}</p><p class="err" id="authErr" role="alert"></p><button class="btn" id="authGo">${join ? 'Join' : 'Sign in'}</button></form>`;
 }
 function whoCard() {
   if (S.rename) return `<form class="card" data-form="rename">${nameField('nick', name(S.me))}<p class="err" id="nickErr" role="alert"></p><div class="row"><button class="btn sm">Save name</button><button type="button" class="btn ghost sm" data-act="rename" data-v="">Cancel</button></div></form>`;
@@ -322,16 +330,20 @@ function render(force) {
   if (!force && a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName) && $('view').contains(a)) { S.dirty = true; return; }
   if (S.mode === 'loading') return;
   if (S.mode === 'auth' || S.mode === 'down') {
-    capture(); $('wk').innerHTML = ''; $('tabs').innerHTML = '';
+    capture(); $('wk').innerHTML = ''; document.body.classList.add('noside');
     $('view').innerHTML = S.mode === 'auth' ? authView() : `<section class="card"><h2>Can't reach Yuzu</h2><p class="mute">Check your connection and try again.</p><button class="btn" data-act="retry">Try again</button></section>`;
     restore(); return;
   }
   capture();
   const t = now(), si = seasonInfo(), n = inboxItems(t).length;
   $('wk').innerHTML = `Week ${si.week} of ${SEASON_WEEKS}<small>closes in ${dur(weekEnd(curWeek()) - t)}</small>`;
-  $('tabs').innerHTML = [['today', 'Today'], ['feed', 'Feed'], ['board', 'League'], ['rules', 'Rules']].map(([k, l]) => `<button data-act="tab" data-v="${k}"${S.tab === k ? ' aria-current="page"' : ''}>${l}${k === 'feed' && n ? `<span class="badge">${n}</span>` : ''}</button>`).join('');
+  document.body.classList.remove('noside');
+  const order = ['today', 'feed', 'board', 'rules'];
+  document.querySelectorAll('#rail button').forEach(b => { if (b.dataset.v === S.tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  $('ind').style.setProperty('--i', order.indexOf(S.tab)); $('feedBadge').textContent = n || '';
   $('view').innerHTML = S.tab === 'feed' ? viewFeed() : S.tab === 'board' ? viewBoard() : S.tab === 'rules' ? viewRules() : viewToday();
   restore(); hydrate();
+  const v = $('view'); v.classList.remove('enter'); if (S.enter) { S.enter = false; void v.offsetWidth; v.classList.add('enter'); }
 }
 document.addEventListener('focusout', () => setTimeout(() => { if (S.dirty) { S.dirty = false; render(); } }, 60));
 setInterval(() => render(), 60000);
@@ -342,7 +354,7 @@ const saveGoals = goals => saveWeek(curWeek(), { goals, lockedAt: now() });
 /* the first thing you save in a new week pins that week's goal list, so later edits never rewrite history */
 function pinned(w, patch) { if (!hasGoals(myWeek(w))) { patch.goals = clone(eff(S.me, w)); patch.lockedAt = now(); } return patch; }
 const acts = {
-  tab(d) { S.tab = d.v; S.rejecting = null; S.edit = null; render(true); window.scrollTo(0, 0); },
+  tab(d) { S.tab = d.v; S.rejecting = null; S.edit = null; S.enter = true; render(true); window.scrollTo(0, 0); },
   lb(d) { S.lbTab = d.v; render(true); },
   lbw(d) { S.lbWeek = d.w || null; S.open = null; render(true); },
   open(d) { S.open = S.open === d.u ? null : d.u; render(true); },
@@ -388,7 +400,8 @@ const forms = {
       token = j.token; try { localStorage.setItem('yuzu_token', token); } catch (e) {}
       const nick = join ? $('a_name').value.trim().replace(/\s+/g, ' ') : '';
       clearDraft('a_'); S.me = j.uid; S.mode = 'loading'; $('view').innerHTML = joinCard(); await sync();
-      if (join) toast("You're locked in to Yuzu, " + nick + '.');
+      S.enter = true; render(true);
+      if (join) celebrate("You're locked in to Yuzu, " + nick + '.');
     } catch (e) { if ($('authGo')) $('authGo').disabled = false; if ($('authErr')) err(AUTH_ERR[e.code] || "Couldn't reach Yuzu. Try again in a moment."); }
   },
   join() { const nick = nickOk(); if (!nick) return; clearDraft('nick'); saveProfile({ joined: now(), nick }); if (!S.config.seasonStart) saveConfig({ seasonStart: curWeek() }); },
@@ -435,7 +448,7 @@ document.addEventListener('change', async e => {
       const ref = await storePhoto(file, w + '_day_' + day + '_' + n);
       S.busy = null;
       const ok = await saveWeek(w, { days: { [day]: { n, t: now(), a: ref.a, ph: ref.ph, re: el.dataset.re || rec.re ? 1 : null } } });
-      if (ok) { const after = myRow(w, now()); toast('Day counted. You\'re on ' + after.pts + '.' + (after.rank && after.rank < before.rank ? ' Up to ' + ord(after.rank) + '.' : '')); }
+      if (ok) { const after = myRow(w, now()); celebrate('Day counted. You\'re on ' + after.pts + '.' + (after.rank && after.rank < before.rank ? ' Up to ' + ord(after.rank) + '.' : '')); }
     } catch (err) { S.busy = null; render(true); toast(err && err.code ? "Couldn't save the image. You may have view-only access." : "Couldn't read that image. Try a screenshot or a JPEG."); }
     return;
   }
