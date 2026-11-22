@@ -19,3 +19,24 @@ jobs:
         run: node tests/core.test.js
       - name: Build
         run: ./build.sh
+
+  e2e:
+    name: two-phone end-to-end
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: pip install playwright pillow psycopg2-binary
+      - name: Run against a throwaway Postgres
+        run: E2E_OUT=e2e-screenshots tests/run-e2e.sh
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: e2e-screenshots/
+          if-no-files-found: ignore

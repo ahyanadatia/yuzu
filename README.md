@@ -10,6 +10,14 @@ Earn your rank. A private league for one flat: daily, weekly and eight-week goal
 
 No framework, no bundler and no runtime dependencies: about 800 lines of plain JavaScript, 260 of HTML and CSS, and 170 of SQL.
 
+## What it looks like
+
+| Today | Referee feed |
+| --- | --- |
+| <img src="docs/today.png" alt="Today view: weekly score and daily goals" width="280"> | <img src="docs/referee-feed.png" alt="Referee feed: goals and proofs waiting for sign-off" width="280"> |
+
+Both are captured by the end-to-end test, with test data.
+
 ## How the league works
 
 - **Three kinds of goal.** Dailies you tick each day, weekly outcomes, and seasonal goals with a baseline and a target over an eight-week season.
@@ -44,4 +52,5 @@ The publishable key is meant to be public. Tables have row level security with n
 
 ## Tests
 - `node tests/core.test.js` checks the scoring and review rules.
-- `tests/e2e.py` drives two simulated phones against a local Postgres through `tests/shim.py`.
+- `tests/run-e2e.sh` starts a throwaway local Postgres, loads `supabase.sql`, and runs `tests/e2e.py`: two simulated phones join, set goals, upload proof and referee each other through `tests/shim.py`, a stand-in for Supabase's REST layer. It fails if any expected outcome is missing.
+- Both run in CI on every push.
