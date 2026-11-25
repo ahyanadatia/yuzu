@@ -20,7 +20,7 @@ async def main():
         # wrong invite code is refused
         await join(A, '07700 900111', 'Asif', code='NOPE'); print('bad code ->', await A.inner_text('#authErr'))
         await A.screenshot(path='tests/a_auth.png'); await A.fill('#a_code', 'test-code'); await A.click('#authGo'); await A.wait_for_timeout(1500); await A.screenshot(path='tests/a_join.png'); await A.wait_for_timeout(1300)
-        print('A signed in as:', (await A.inner_text('.who')).split('Change')[0].strip())
+        print('A signed in as:', (await A.inner_text('.acct')).split('Change')[0].strip())
         await add_goal(A, 'd', 'Hit my protein', 'Athletic', {'e_ml': 'Protein', 'e_mt': '150', 'e_mu': 'g'})
         await add_goal(A, 'd', 'Study 2 hours', 'Academic')
         await add_goal(A, 'w', 'Write 500 words', 'Creative', {'e_s': 'Draft done'})
