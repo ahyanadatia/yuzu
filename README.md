@@ -4,19 +4,19 @@
 
 Earn your rank. A private league for one flat: daily, weekly and eight-week goals, proved with images, refereed by flatmates, scored out of 100 each week.
 
-- `index.html` is the whole site, built from `src/`. It is deployed on Netlify.
+- `index.html` is the whole site, built from `src/`. Open it in a browser to try a preview with sample flatmates. Nothing is saved until you point a build at your own Supabase project.
 - `supabase.sql` creates the database tables and functions on Supabase.
 - Sign-in is phone number plus a 6-digit PIN, with a flat invite code for new members. No text messages are sent.
 
-No framework, no bundler and no runtime dependencies: about 800 lines of plain JavaScript, 260 of HTML and CSS, and 170 of SQL.
+No framework, no bundler and no runtime dependencies: about 840 lines of plain JavaScript, 300 of HTML and CSS, and 170 of SQL.
 
 ## What it looks like
 
-| Today | Referee feed |
-| --- | --- |
-| <img src="docs/today.png" alt="Today view: weekly score and daily goals" width="280"> | <img src="docs/referee-feed.png" alt="Referee feed: goals and proofs waiting for sign-off" width="280"> |
+| Today | Referee feed | League |
+| --- | --- | --- |
+| <img src="docs/today.png" alt="Today view: weekly score and daily goals" width="260"> | <img src="docs/referee-feed.png" alt="Referee feed: a spot check waiting for sign-off" width="260"> | <img src="docs/league.png" alt="League standings for the week" width="260"> |
 
-Both are captured by the end-to-end test, with test data.
+These are from the in-repo preview, with sample data. On a phone the tabs sit at the bottom; from about 720px they move to a side rail.
 
 ## How the league works
 
@@ -37,11 +37,13 @@ These rules live in `src/core.js` as pure functions with no DOM or network acces
 
 ## Run your own
 1. Create a free Supabase project. Open the SQL editor, paste `supabase.sql`, change `CHANGE-ME` to your invite code, and run it.
-2. Copy the project URL and the publishable key from Project Settings > API Keys.
+2. Copy the project URL and the publishable key from Project Settings > API Keys. `.env.example` lists the two variables `build.sh` expects.
 3. `SUPABASE_URL=... SUPABASE_KEY=... ./build.sh`
-4. Drop `index.html` onto Netlify.
+4. Drop `index.html` onto Netlify, Vercel, or any static host.
 
-The publishable key is meant to be public. Tables have row level security with no policies, so the key cannot read or write them; every call goes through a function that checks a session token.
+The publishable key is meant to be public. Tables have row level security with no policies, so the key cannot read or write them; every call goes through a function that checks a session token. Until you build with those values, the page stays in the sample preview.
+
+Once a project is connected, the sign-in screen also has a link to look around with sample data first.
 
 ## Looking after it
 - Change the invite code: `update public.yz_config set invite_code = 'NEW-CODE' where id = 1;`
