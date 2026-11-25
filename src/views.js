@@ -12,7 +12,7 @@ function mark(l, r, b) {
   return `<svg viewBox="136 88 406 368" role="img" aria-label="Daily, weekly and season progress" class="seg3">${seg('140,92 275,123 333,238 203,205', l)}${seg('538,92 407,123 345,238 473,205', r)}${seg('340,245 388,312 340,452 290,312', b)}</svg>`;
 }
 function banner() {
-  if (S.mode === 'sample') return `<div class="note"><b>Sample data.</b> Yuzu isn't connected to its database yet, so this is a preview with made-up flatmates. Nothing here is saved.</div>`;
+  if (S.mode === 'sample') return `<div class="note"><b>Sample data.</b> This is a preview with made-up flatmates. Nothing here is saved.${configured() ? ' <button type="button" class="link" data-act="signin">Sign in to your league</button>' : ''}</div>`;
   return S.stale ? `<div class="note">Still connecting. What you see may be out of date.</div>` : '';
 }
 const sel = (id, val) => `<select id="${id}">${CATS.map(c => `<option${c === val ? ' selected' : ''}>${c}</option>`).join('')}</select>`;
@@ -68,7 +68,13 @@ function viewToday() {
   if (!goals.length) return out.join('') + startCard(goals);
   const cats = [...new Set(goals.map(g => g.cat))];
   if (cats.length < MIN_CATS || !ds.length || !ws.length || !ss.length) out.push(checklist(goals, cats));
-  if (ds.length) out.push(`<p class="sec">Today · ${dst.hits.length} of ${ds.length} done</p>` + ds.map(g => dailyCard(g, w, t, rec, wk, goals)).join('') + closeCard(w, day, t, dst, rec, goals));
+  if (ds.length) {
+    const list = ds.map(g => dailyCard(g, w, t, rec, wk, goals)).join('');
+    const close = closeCard(w, day, t, dst, rec, goals);
+    const head = `<p class="sec">Today · ${dst.hits.length} of ${ds.length} done</p>`;
+    const due = dst.s !== 'none' && dst.s !== 'open';
+    out.push(due ? close + head + list : head + list + close);
+  }
   if (ws.length) out.push(`<p class="sec">This week</p>` + ws.map(g => goalCard(g, w, day, t, se)).join(''));
   if (ss.length) out.push(`<p class="sec">This season · week ${se.week} of ${SEASON_WEEKS}</p>` + ss.map(g => goalCard(g, w, day, t, se)).join(''));
   out.push(addRow());
@@ -79,17 +85,17 @@ function checklist(goals, cats) {
   const li = (ok, text) => `<li class="${ok ? 'done' : ''}">${text}</li>`, has = t => goals.some(g => g.type === t);
   return `<section class="card"><p class="eyebrow">Your set-up</p><ul class="checklist">${li(cats.length >= MIN_CATS, `Goals across ${MIN_CATS} categories${cats.length ? ' (you have ' + esc(list(cats)) + ')' : ''}. <b>Nothing scores until this is done.</b>`)}${li(has('d'), 'A daily habit: worth up to 50 a week')}${li(has('w'), 'A weekly outcome: worth up to 30')}${li(has('s'), 'A seasonal goal: worth up to 20')}</ul></section>`;
 }
-const nameField = (id, val) => `<label>Your name in the league<input type="text" id="${id}" maxlength="20" autocomplete="nickname" value="${esc(val)}" placeholder="Input name here"></label>`;
-function joinCard() { return `<section class="card"><p class="mute">Loading your league…</p></section>`; }
+const nameField = (id, val) => `<label>Your name in the league<input type="text" id="${id}" maxlength="20" autocomplete="nickname" value="${esc(val)}" placeholder="Maya"></label>`;
+function joinCard() { return `<section class="card skel" aria-live="polite"><p class="eyebrow">Earn your rank.</p><div class="sk sk-title"></div><div class="sk sk-block"></div><div class="sk sk-line"></div></section>`; }
 const normPhone = v => { let d = String(v || '').replace(/[^0-9+]/g, ''); if (d.startsWith('00')) d = '+' + d.slice(2); else if (d.startsWith('0')) d = '+44' + d.slice(1); else if (!d.startsWith('+')) d = '+' + d; return /^\+[0-9]{8,15}$/.test(d) ? d : null; };
 function authView() {
   const join = S.auth === 'join';
-  return `<div class="hero">${YUZU}<i class="sh"></i></div><form class="card" data-form="auth"><p class="eyebrow">Earn your rank.</p><h2>${join ? 'Join the league' : 'Welcome back'}</h2><div class="seg"><button type="button" data-act="auth" data-v="join" aria-pressed="${join}">New here</button><button type="button" data-act="auth" data-v="login" aria-pressed="${!join}">Sign in</button></div><label>Phone number<input type="tel" id="a_phone" autocomplete="tel" inputmode="tel" placeholder="07700 900123"></label>${join ? nameField('a_name', '') : ''}<label>${join ? 'Choose a 6-digit PIN' : 'Your PIN'}<input type="password" id="a_pin" inputmode="numeric" maxlength="6" autocomplete="${join ? 'new-password' : 'current-password'}"></label>${join ? `<label>Flat invite code<input type="text" id="a_code" autocapitalize="characters" autocomplete="off" placeholder="Ask a flatmate for it"></label>` : ''}<p class="small mute">${join ? 'Your number is how you sign in. No text is sent, so pick a PIN you will remember.' : 'Forgot your PIN? Ask whoever set Yuzu up to reset it.'}</p><p class="err" id="authErr" role="alert"></p><button class="btn" id="authGo">${join ? 'Join' : 'Sign in'}</button></form>`;
+  return `<div class="hero">${YUZU}<i class="sh"></i></div><form class="card" data-form="auth"><p class="eyebrow">Earn your rank.</p><h2>${join ? 'Join the league' : 'Welcome back'}</h2><div class="seg"><button type="button" data-act="auth" data-v="join" aria-pressed="${join}">New here</button><button type="button" data-act="auth" data-v="login" aria-pressed="${!join}">Sign in</button></div><label>Phone number<input type="tel" id="a_phone" autocomplete="tel" inputmode="tel" placeholder="07700 900123"></label>${join ? nameField('a_name', '') : ''}<label>${join ? 'Choose a 6-digit PIN' : 'Your PIN'}<input type="password" id="a_pin" inputmode="numeric" maxlength="6" pattern="[0-9]*" autocomplete="${join ? 'new-password' : 'current-password'}"></label>${join ? `<label>Flat invite code<input type="text" id="a_code" autocapitalize="characters" autocomplete="off" placeholder="Ask a flatmate for it"></label>` : ''}<p class="small mute">${join ? 'Your number is how you sign in. No text is sent, so pick a PIN you will remember.' : 'Forgot your PIN? Ask whoever set Yuzu up to reset it.'}</p><p class="err" id="authErr" role="alert"></p><button class="btn" id="authGo">${join ? 'Join' : 'Sign in'}</button>${configured() ? '<button type="button" class="link" data-act="preview">Look around first, with sample data</button>' : ''}</form>`;
 }
 function whoCard() {
   if (S.rename) return `<form class="card" data-form="rename">${nameField('nick', name(S.me))}<p class="err" id="nickErr" role="alert"></p><div class="row"><button class="btn sm">Save name</button><button type="button" class="btn ghost sm" data-act="rename" data-v="">Cancel</button></div></form>`;
   const others = Object.keys(S.players).filter(u => u !== S.me).map(name);
-  return `<div class="who">${avatar(S.me)}<span>Signed in as <b>${esc(name(S.me))}</b>${others.length ? ` <span class="mute">· with ${esc(list(others))}</span>` : ''}</span><button class="link" data-act="rename" data-v="1">Change name</button><button class="link" data-act="signout">Sign out</button></div>`;
+  return `<div class="acct">${avatar(S.me)}<div class="acct-id"><b>${esc(name(S.me))}</b>${others.length ? `<span class="mute">with ${esc(list(others))}</span>` : ''}</div><button type="button" class="link" data-act="rename" data-v="1">Change name</button><button type="button" class="link" data-act="signout">Sign out</button></div>`;
 }
 function nickOk() {
   const v = $('nick').value.trim().replace(/\s+/g, ' ');
@@ -118,13 +124,13 @@ function dailyCard(g, w, t, rec, wk, goals) {
 }
 function closeCard(w, day, t, st, rec, goals) {
   const left = dur(dayEnd(day) - t), ag = goals.find(g => g.id === st.audit);
-  if (st.s === 'none') return `<div class="note">Tick what you did today. When you're finished, close out the day: <b>one image proves all of it.</b></div>`;
-  if (st.s === 'open') return `<section class="card show"><p class="eyebrow">Close out today</p><h3>${st.hits.length} done. One will be drawn as your spot check.</h3><p class="small mute">You'll upload a single image for the goal that's drawn. After closing out, today's ticks can't change.</p><button class="btn" data-act="close">Close out the day</button></section>`;
-  if (st.s === 'due') return `<section class="card show"><p class="eyebrow">Spot check</p><h3>Show proof of: ${esc(ag ? ag.title : '')}</h3><p class="proof">${esc(ag ? ag.proof : '')}${ag && typeof rec.ticks[ag.id] === 'number' ? ' · you typed ' + esc(fmtV(rec.ticks[ag.id], ag.m ? ag.m.u : '')) : ''}</p>${S.busy === 'day' ? `<p class="state wait">Uploading…</p>` : `<label class="btn">Upload image<input type="file" accept="image/*" class="vh" data-day="${day}"></label>`}<p class="small mute">Due in ${left}, before the day closes. Without it, today scores nothing.</p></section>`;
-  if (st.s === 'void') return `<div class="note"><b>Today can't be scored.</b> The day was closed out without a valid spot check.</div>`;
+  if (st.s === 'none') return `<div class="note" id="spot">Tick what you did today. When you're finished, close out the day: <b>one image proves all of it.</b></div>`;
+  if (st.s === 'open') return `<section class="card show" id="spot"><p class="eyebrow">Close out today</p><h3>${st.hits.length} done. One will be drawn as your spot check.</h3><p class="small mute">You'll upload a single image for the goal that's drawn. After closing out, today's ticks can't change.</p><button class="btn" data-act="close">Close out the day</button></section>`;
+  if (st.s === 'due') return `<section class="card show" id="spot"><p class="eyebrow">Spot check</p><h3>Show proof of: ${esc(ag ? ag.title : '')}</h3><p class="proof">${esc(ag ? ag.proof : '')}${ag && typeof rec.ticks[ag.id] === 'number' ? ' · you typed ' + esc(fmtV(rec.ticks[ag.id], ag.m ? ag.m.u : '')) : ''}</p>${S.busy === 'day' ? `<p class="state wait">Uploading…</p>` : `<label class="btn">Upload image<input type="file" accept="image/*" class="vh" data-day="${day}"></label>`}<p class="small mute">Due in ${left}, before the day closes. Without it, today scores nothing.</p></section>`;
+  if (st.s === 'void') return `<div class="note" id="spot"><b>Today can't be scored.</b> The day was closed out without a valid spot check.</div>`;
   const retake = (st.s === 'counted' && !st.ok) || (st.s === 'rejected' && !rec.re && t - st.noT < 12 * H);
   const chip = st.s === 'rejected' ? `<span class="state bad">Day rejected${st.reason ? ' · ' + esc(st.reason) : ''}</span>` : st.s === 'counted' ? `<span class="state wait">Day counted · awaiting review</span>` : `<span class="state ok">Day verified</span>`;
-  return `<section class="card"><p class="eyebrow">Today is closed out</p><div class="line">${photo(S.me, w + '_day_' + day + '_' + rec.n, rec, 'thumb')}<div>${chip}<p class="small mute">Spot check: ${esc(ag ? ag.title : '')}</p>${st.s === 'rejected' ? `<p class="small mute">Two flatmates approving overturns it.</p>` : ''}</div>${retake && S.busy !== 'day' ? `<label class="link">Replace image<input type="file" accept="image/*" class="vh" data-day="${day}" data-re="${st.s === 'rejected' ? 1 : ''}"></label>` : ''}</div></section>`;
+  return `<section class="card" id="spot"><p class="eyebrow">Today is closed out</p><div class="line">${photo(S.me, w + '_day_' + day + '_' + rec.n, rec, 'thumb')}<div>${chip}<p class="small mute">Spot check: ${esc(ag ? ag.title : '')}</p>${st.s === 'rejected' ? `<p class="small mute">Two flatmates approving overturns it.</p>` : ''}</div>${retake && S.busy !== 'day' ? `<label class="link">Replace image<input type="file" accept="image/*" class="vh" data-day="${day}" data-re="${st.s === 'rejected' ? 1 : ''}"></label>` : ''}</div></section>`;
 }
 function goalCard(g, w, day, t, se) {
   const wk = myWeek(w) || {}, cs = wk.checkins || {}, daily = g.type === 'd', seasonal = g.type === 's', key = daily ? g.id + '_' + day : g.id + '_w', c = cs[key];
@@ -272,7 +278,7 @@ function viewBoard() {
   out.push('<div class="table">' + st.rows.map(r => {
     const open = S.open === r.u, dots = weekDays(w).map(d => { const k = r.daily[d] || 0; return `<i class="dot ${r.nd && k >= r.nd ? 'f' : k ? 'h' : ''}${d === today ? ' today' : ''}"></i>`; }).join('');
     const sub = !r.locked ? 'No goals yet' : !r.valid ? 'Needs ' + MIN_CATS + ' categories' : `D${Math.round(r.d)} W${Math.round(r.w)} S${Math.round(r.s)}`;
-    return `<div class="lrow${r.rank === 1 && r.pts > 0 ? ' first' : ''}"><button data-act="open" data-u="${esc(r.u)}" aria-expanded="${open}"><span class="rk">${r.rank}</span><span class="nm"><span class="n1">${avatar(r.u)}<span>${esc(name(r.u))}</span>${wins[r.u] ? `<span class="wins">${wins[r.u]} ${wins[r.u] === 1 ? 'win' : 'wins'}</span>` : ''}</span><span class="dots" aria-label="${r.days.size} days with a check-in">${dots}<span class="wkm">${sub}</span></span></span><span class="pts">${r.pts}<small>of 100</small></span></button>${open ? detail(r.u, w) : ''}</div>`;
+    return `<div class="lrow${r.rank === 1 && r.pts > 0 ? ' first' : ''}${r.u === S.me ? ' me' : ''}"><button data-act="open" data-u="${esc(r.u)}" aria-expanded="${open}"><span class="rk">${r.rank}</span><span class="nm"><span class="n1">${avatar(r.u)}<span>${esc(name(r.u))}</span>${r.u === S.me ? '<span class="you">You</span>' : ''}${wins[r.u] ? `<span class="wins">${wins[r.u]} ${wins[r.u] === 1 ? 'win' : 'wins'}</span>` : ''}</span><span class="dots" aria-label="${r.days.size} days with a check-in">${dots}<span class="wkm">${sub}</span></span></span><span class="pts">${r.pts}<small>of 100</small></span></button>${open ? detail(r.u, w) : ''}</div>`;
   }).join('') + '</div>');
   out.push(`<p class="small mute">Each square is a day: full when every daily is done. D, W and S are the daily (50), weekly (30) and season (20) parts of the score. Ties break on days checked in, then reviews done.</p>`);
   if (uids.length) out.push(`<button class="btn ghost" data-act="copy" data-w="${w}">Copy standings for the group chat</button>`);
@@ -341,6 +347,7 @@ function render(force) {
   const order = ['today', 'feed', 'board', 'rules'];
   document.querySelectorAll('#rail button').forEach(b => { if (b.dataset.v === S.tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   $('ind').style.setProperty('--i', order.indexOf(S.tab)); $('feedBadge').textContent = n || '';
+  document.title = n ? 'Yuzu (' + n + ')' : 'Yuzu';
   $('view').innerHTML = S.tab === 'feed' ? viewFeed() : S.tab === 'board' ? viewBoard() : S.tab === 'rules' ? viewRules() : viewToday();
   restore(); hydrate();
   const v = $('view'); v.classList.remove('enter'); if (S.enter) { S.enter = false; void v.offsetWidth; v.classList.add('enter'); }
@@ -375,11 +382,17 @@ const acts = {
   close() {
     const w = curWeek(), t = now(), day = gameDay(t), st = dayOf(S.me, w, day, t); if (st.s !== 'open') return;
     const audit = auditPick(S.me, day, st.hits), g = eff(S.me, w).find(x => x.id === audit);
-    saveWeek(w, { days: { [day]: { closed: t, audit } } }); toast('Spot check: ' + (g ? g.title : '') + '. Upload one image.'); window.scrollTo(0, 0);
+    saveWeek(w, { days: { [day]: { closed: t, audit } } }); toast('Spot check: ' + (g ? g.title : '') + '. Upload one image.');
+    const spot = $('spot'); if (spot) spot.scrollIntoView({ block: 'start' });
   },
   auth(d) { S.auth = d.v; render(true); },
   signout() { signOut(false); },
   retry() { S.mode = 'loading'; sync(); },
+  preview() { sample(); toast('Preview only. Nothing is saved.'); },
+  signin() {
+    S.me = null; S.players = {}; S.weeks = {}; S.photos = {}; S.edit = null; S.rename = false; S.tab = 'today'; S.mode = 'auth'; S.auth = 'login';
+    render(true);
+  },
   rej(d) { S.rejecting = d.id || null; render(true); },
   rv(d) { S.rejecting = null; saveWeek(d.key.startsWith('g_') ? curWeek() : d.w, { reviews: { [d.u + '__' + d.key]: { v: +d.v, r: d.r || null, n: +d.n, t: now() } } }); toast(+d.v ? 'Approved.' : 'Rejected. Two approvals from others can overturn it.'); },
   copy(d) {
@@ -434,6 +447,8 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (b && acts[b.dataset.act]) acts[b.dataset.act](b.dataset, b);
 });
 $('zoom').addEventListener('click', () => $('zoom').classList.remove('on'));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('zoom').classList.remove('on'); });
+document.addEventListener('input', e => { if (e.target && e.target.id === 'a_pin') e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); });
 document.addEventListener('submit', e => { e.preventDefault(); const f = forms[e.target.dataset.form]; if (f) f(e.target); });
 document.addEventListener('error', e => { const t = e.target; if (t && t.tagName === 'IMG' && t.dataset.zoom !== undefined) { const d = document.createElement('div'); d.className = t.className + ' ph'; d.textContent = 'Photo unavailable'; t.replaceWith(d); } }, true);
 document.addEventListener('change', async e => {
@@ -489,16 +504,52 @@ function sample(why) {
         const ids = Object.keys(ticks), tt = d === today ? t - 20 * 60000 : at(d, 21);
         if (ids.length && tt <= t) ds[d] = { ticks, closed: tt, audit: auditPick(u, d, ids), n: 1, t: tt, ph: 1 };
       }
-      if (w === pw) { if (f > .5) cs.c_w = { n: 1, t: at(addDays(w, 5), 15), lvl: f > .8 ? 's' : 'n' }; cs.s_w = { n: 1, t: at(addDays(w, 6), 11), v: cur }; }
+      if (w === pw) { if (f > .5) cs.c_w = { n: 1, t: at(addDays(w, 5), 15), lvl: f > .8 ? 's' : 'n', ph: 1 }; cs.s_w = { n: 1, t: at(addDays(w, 6), 11), v: cur, ph: 1 }; }
       S.weeks[u][w] = w === pw ? { goals, lockedAt: at(pw, 9), days: ds, checkins: cs, reviews: {} } : { days: ds, checkins: cs, reviews: {} };
     }
   }
   S.weeks.priya[cw].reviews = { maya__a_x: { v: 1, n: 1, t }, tom__a_x: { v: 1, n: 1, t }, sam__a_x: { v: 1, n: 1, t } };
+  S.photos = {};
+  for (const u in S.weeks) {
+    for (const w in S.weeks[u]) {
+      const wk = S.weeks[u][w], goals = goalsFor(S.weeks, u, w);
+      for (const d in wk.days || {}) {
+        const rec = wk.days[d];
+        if (rec && rec.ph) S.photos[u + '|' + w + '_day_' + d + '_' + (rec.n || 1)] = fakeShot(name(u) + ' · ' + wd(d));
+      }
+      for (const key in wk.checkins || {}) {
+        const c = wk.checkins[key], g = goalOf(goals, key);
+        if (c && g) S.photos[u + '|' + w + '_' + key + '_' + (c.n || 1)] = fakeShot(g.title);
+      }
+    }
+  }
   render(true);
 }
 
+function fakeShot(label) {
+  const c = document.createElement('canvas');
+  c.width = 960; c.height = 720;
+  const x = c.getContext('2d');
+  x.fillStyle = '#161719'; x.fillRect(0, 0, 960, 720);
+  x.strokeStyle = '#3A3D43'; x.lineWidth = 2; x.strokeRect(24, 24, 912, 672);
+  x.fillStyle = '#F5E447';
+  x.save(); x.translate(480, 330); x.scale(0.72, 0.72); x.translate(-339, -272);
+  x.beginPath(); x.moveTo(140, 92); x.lineTo(275, 123); x.lineTo(333, 238); x.lineTo(203, 205); x.closePath(); x.fill();
+  x.beginPath(); x.moveTo(538, 92); x.lineTo(407, 123); x.lineTo(345, 238); x.lineTo(473, 205); x.closePath(); x.fill();
+  x.beginPath(); x.moveTo(340, 245); x.lineTo(388, 312); x.lineTo(340, 452); x.lineTo(290, 312); x.closePath(); x.fill();
+  x.restore();
+  x.fillStyle = '#F5F5F0';
+  x.font = '600 28px Barlow, system-ui, sans-serif';
+  x.fillText(String(label || 'Proof').slice(0, 42), 48, 640);
+  x.fillStyle = '#8A8C87';
+  x.font = '600 14px Barlow, system-ui, sans-serif';
+  x.fillText('SAMPLE PROOF', 48, 674);
+  return c.toDataURL('image/jpeg', .72);
+}
+
+
 function init() {
-  if (!/^https?:/.test(CFG.url)) return sample();
+  if (!configured()) return sample();
   if (!token) { S.mode = 'auth'; return render(true); }
   sync();
 }

@@ -1,5 +1,6 @@
 /* ---------- app (standalone: phone number + PIN, own database) ---------- */
 const CFG = { url: '__SUPABASE_URL__', key: '__SUPABASE_KEY__' };
+const configured = () => /^https?:/.test(CFG.url);
 const CATS = ['Athletic', 'Academic', 'Business', 'Creative', 'Life', 'Flat'];
 const REASONS = { c: ['Wrong day', "Can't tell", 'Not the goal'], g: ['Too easy', 'Too vague', 'No clear proof'] };
 const TPL = [
@@ -84,7 +85,9 @@ async function sync() {
 function signOut(expired) {
   if (token && !expired) rpc('yz_logout', { p_token: token }).catch(() => {});
   token = null; try { localStorage.removeItem('yuzu_token'); } catch (e) {}
-  S.me = null; S.players = {}; S.weeks = {}; S.photos = {}; S.edit = null; S.tab = 'today'; S.mode = 'auth'; S.auth = 'login';
+  S.me = null; S.players = {}; S.weeks = {}; S.photos = {}; S.edit = null; S.rename = false; S.tab = 'today';
+  if (!configured()) { sample(); if (expired) toast('Please sign in again.'); return; }
+  S.mode = 'auth'; S.auth = 'login';
   render(true); if (expired) toast('Please sign in again.');
 }
 setInterval(() => { if (token && document.visibilityState === 'visible' && S.mode !== 'auth') sync(); }, 20000);
