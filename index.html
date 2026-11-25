@@ -650,8 +650,10 @@ function viewToday() {
     const list = ds.map(g => dailyCard(g, w, t, rec, wk, goals)).join('');
     const close = closeCard(w, day, t, dst, rec, goals);
     const head = `<p class="sec">Today · ${dst.hits.length} of ${ds.length} done</p>`;
-    const due = dst.s !== 'none' && dst.s !== 'open';
-    out.push(due ? close + head + list : head + list + close);
+    // Keep the upload / problem card at the top. A finished day stays under the ticks
+    // so the last status on the page is still the day's verdict.
+    const pin = dst.s === 'due' || dst.s === 'void' || dst.s === 'rejected';
+    out.push(pin ? close + head + list : head + list + close);
   }
   if (ws.length) out.push(`<p class="sec">This week</p>` + ws.map(g => goalCard(g, w, day, t, se)).join(''));
   if (ss.length) out.push(`<p class="sec">This season · week ${se.week} of ${SEASON_WEEKS}</p>` + ss.map(g => goalCard(g, w, day, t, se)).join(''));
